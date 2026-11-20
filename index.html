@@ -1,0 +1,1926 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="text-scale" content="scale">
+<meta name="theme-color" content="#f7e6d0">
+<meta name="description" content="Jogo relaxante de classificar cores em tubos, feito para jogar no celular.">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<title>Tubos de Cor</title>
+<style>
+:root{
+  --ink:#4a2f21;
+  --edge:#8c6244;
+  --accent:#b84423;
+  --accent-dark:#7f2b12;
+  --banner-ink:#8f371b;
+  --card:#fffaf1;
+  --shadow-btn:#c8a280;
+  --done:#00805E;
+}
+*,*::before,*::after{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+html,body{
+  margin:0;
+  min-height:100vh;
+  min-height:100dvh;
+  overscroll-behavior:none;
+}
+body{
+  font-family:system-ui,Roboto,"Segoe UI",sans-serif;
+  color:var(--ink);
+  background:radial-gradient(circle at 30% 0%,#fffaf1 0%,transparent 55%),linear-gradient(175deg,#f7e6d0 0%,#eccdb0 100%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  touch-action:manipulation;
+  user-select:none;
+  -webkit-user-select:none;
+  padding:
+    max(10px,env(safe-area-inset-top))
+    max(12px,env(safe-area-inset-right))
+    max(12px,env(safe-area-inset-bottom))
+    max(12px,env(safe-area-inset-left));
+}
+input,textarea{
+  user-select:text;
+  -webkit-user-select:text;
+}
+h1,h2{
+  font-family:"Noto Serif",Georgia,ui-serif,serif;
+  font-weight:normal;
+  text-wrap:balance;
+}
+header{
+  width:100%;
+  max-width:var(--shell-max,560px);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+h1{
+  font-size:1.45rem;
+  margin:2px 0;
+  line-height:1.2;
+}
+.hdr-controls{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  margin-left:auto;
+}
+#lvl{
+  font-size:1.05rem;
+  font-weight:700;
+  background:var(--card);
+  border:2px solid #cfa987;
+  border-radius:999px;
+  padding:8px 14px;
+  min-block-size:44px;
+  display:inline-flex;
+  align-items:center;
+  box-shadow:0 2px 6px rgba(74,47,33,.14);
+  touch-action:none;
+  cursor:pointer;
+  font-variant-numeric:tabular-nums;
+}
+button{
+  font:inherit;
+  color:var(--ink);
+  background:var(--card);
+  border:2px solid #cfa987;
+  border-radius:16px;
+  padding:10px 14px;
+  min-block-size:44px;
+  min-inline-size:44px;
+  box-shadow:0 4px 0 var(--shadow-btn);
+  cursor:pointer;
+  touch-action:manipulation;
+}
+button:active:not(:disabled){
+  transform:translateY(3px);
+  box-shadow:0 1px 0 var(--shadow-btn);
+}
+button:disabled{
+  opacity:.46;
+  cursor:default;
+}
+button:focus-visible,input:focus-visible{
+  outline:3px solid var(--accent);
+  outline-offset:3px;
+}
+.icon-btn{
+  padding:8px 10px;
+  font-size:1.1rem;
+  font-weight:700;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+.icon-btn[aria-pressed="true"]{
+  background:#f4d5b8;
+  border-color:var(--accent);
+}
+#install-app{
+  font-size:.92rem;
+  font-weight:700;
+  padding:8px 12px;
+  background:var(--accent);
+  color:#fff;
+  border-color:var(--accent-dark);
+  box-shadow:0 3px 0 var(--accent-dark);
+}
+#install-app:active:not(:disabled){
+  box-shadow:0 1px 0 var(--accent-dark);
+}
+main{
+  flex:1;
+  width:100%;
+  max-width:var(--shell-max,560px);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-height:0;
+}
+#banner{
+  min-block-size:1.75rem;
+  margin:6px 0 2px;
+  font-family:"Noto Serif",Georgia,ui-serif,serif;
+  font-style:italic;
+  font-weight:600;
+  color:var(--banner-ink);
+  text-align:center;
+  font-size:1rem;
+  line-height:1.35;
+  text-wrap:pretty;
+  padding:0 4px;
+}
+#next-inline{
+  margin:4px 0;
+  background:var(--accent);
+  color:#fff;
+  border-color:var(--accent-dark);
+  box-shadow:0 4px 0 var(--accent-dark);
+  font-weight:700;
+  font-size:1.05rem;
+  padding:10px 20px;
+}
+#board{
+  flex:1;
+  width:100%;
+  max-width:var(--board-max,520px);
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  align-content:center;
+  gap:var(--gy,26px) var(--gx,12px);
+  padding:18px 0 10px;
+  min-height:0;
+}
+.tube{
+  appearance:none;
+  -webkit-appearance:none;
+  padding:0;
+  margin:0;
+  min-inline-size:0;
+  min-block-size:0;
+  width:var(--tw,64px);
+  height:var(--th,236px);
+  position:relative;
+  border:3px solid var(--edge);
+  border-top:none;
+  border-radius:6px 6px calc(var(--tw,64px) * .5) calc(var(--tw,64px) * .5);
+  background:linear-gradient(90deg,rgba(255,255,255,.78),rgba(255,255,255,.32) 40%,rgba(255,255,255,.64));
+  box-shadow:inset 0 -6px 10px rgba(74,47,33,.12),0 6px 12px rgba(74,47,33,.16);
+  cursor:pointer;
+  touch-action:manipulation;
+  transition:border-color .2s ease,box-shadow .2s ease;
+}
+@media (prefers-reduced-motion:no-preference){
+  .tube{
+    transition:transform .22s ease,border-color .2s ease,box-shadow .2s ease;
+  }
+}
+.tube:active:not(:disabled){
+  transform:none;
+  box-shadow:inset 0 -6px 10px rgba(74,47,33,.12),0 6px 12px rgba(74,47,33,.16);
+}
+.tube::before{
+  content:"";
+  position:absolute;
+  top:-8px;
+  left:-6px;
+  right:-6px;
+  height:10px;
+  border-radius:6px;
+  background:var(--edge);
+  z-index:2;
+  pointer-events:none;
+  transition:background .2s ease;
+}
+.tube.sel{
+  transform:translateY(-14px);
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(184,68,35,.32),inset 0 -6px 10px rgba(74,47,33,.12),0 14px 18px rgba(74,47,33,.22);
+}
+.tube.sel:active:not(:disabled){
+  transform:translateY(-14px);
+}
+.tube.sel::before{
+  background:var(--accent);
+}
+.tube.done:not(.sel){
+  border-color:#007253;
+}
+.tube.done:not(.sel)::before{
+  background:#007253;
+}
+.tube-done{
+  position:absolute;
+  top:-22px;
+  left:50%;
+  transform:translateX(-50%);
+  width:22px;
+  height:22px;
+  border-radius:999px;
+  background:var(--done);
+  color:#fff;
+  font-size:13px;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 2px 6px rgba(0,0,0,.24);
+  opacity:0;
+  pointer-events:none;
+  z-index:3;
+  transition:opacity .2s ease;
+}
+.tube.done .tube-done{
+  opacity:1;
+}
+.tube-inner{
+  position:relative;
+  width:100%;
+  height:100%;
+  padding:4px 5px 5px;
+  display:flex;
+  flex-direction:column-reverse;
+  gap:0;
+  overflow:hidden;
+  border-radius:3px 3px calc(var(--tw,64px) * .45) calc(var(--tw,64px) * .45);
+  pointer-events:none;
+}
+@media (prefers-reduced-motion:no-preference){
+  .tube.nope{
+    animation:nope .35s;
+  }
+}
+@keyframes nope{
+  0%,100%{transform:translateX(0)}
+  25%{transform:translateX(-6px)}
+  75%{transform:translateX(6px)}
+}
+/* segmentos quadrados para fundir com o de cima; só o da base é arredondado */
+.seg{
+  height:var(--seg,42px);
+  width:100%;
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  transition:background .25s ease;
+}
+.seg:first-child{
+  border-radius:0 0 calc(var(--tw,64px) * .34) calc(var(--tw,64px) * .34);
+}
+.seg.edge{
+  box-shadow:inset 0 -3px 0 rgba(0,0,0,.34);
+}
+.seg.cov{
+  background:repeating-linear-gradient(45deg,#dfd2c0 0 6px,#cfc0aa 6px 12px);
+  color:#4a3525;
+  font-weight:700;
+  font-size:clamp(14px,calc(var(--seg,42px) * .48),20px);
+}
+.seg .sym{
+  display:none;
+  font-weight:700;
+  line-height:1;
+  font-size:clamp(12px,calc(var(--seg,42px) * .52),20px);
+}
+body.show-symbols .seg .sym{
+  display:block;
+}
+@media (prefers-reduced-motion:no-preference){
+  .seg.incoming{
+    animation:incoming .22s ease .22s both;
+    transform-origin:bottom;
+  }
+}
+@keyframes incoming{
+  from{opacity:0;transform:scaleY(.3)}
+  to{opacity:1;transform:none}
+}
+.blob{
+  position:fixed;
+  width:var(--blob-w,34px);
+  height:var(--blob-h,24px);
+  border-radius:4px 4px 16px 16px;
+  pointer-events:none;
+  z-index:50;
+  box-shadow:0 3px 6px rgba(0,0,0,.2);
+}
+footer{
+  width:100%;
+  max-width:var(--shell-max,560px);
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  margin-top:6px;
+}
+footer button{
+  min-block-size:52px;
+  padding:8px 6px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  line-height:1.15;
+  font-size:.95rem;
+  font-weight:700;
+}
+footer button .sub{
+  font-size:.78rem;
+  font-weight:500;
+  font-variant-numeric:tabular-nums;
+  min-height:1em;
+  opacity:.9;
+}
+dialog{
+  border:none;
+  padding:0;
+  background:transparent;
+  max-width:none;
+  max-height:none;
+  color:var(--ink);
+}
+dialog:modal{
+  overscroll-behavior:contain;
+}
+dialog::backdrop{
+  background:rgba(65,42,28,.48);
+  overflow:hidden;
+  overscroll-behavior:contain;
+}
+#win[open]{
+  width:100vw;
+  height:100dvh;
+  max-width:100vw;
+  max-height:100dvh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+#fx{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  z-index:0;
+}
+.card{
+  position:relative;
+  z-index:1;
+  background:var(--card);
+  border-radius:26px;
+  padding:24px 22px;
+  text-align:center;
+  width:min(92vw,350px);
+  box-shadow:0 14px 36px rgba(74,47,33,.28);
+  border:3px solid #e6b86a;
+}
+#win h2{
+  font-size:1.9rem;
+  margin:0 0 8px;
+  color:var(--accent);
+}
+#stars{
+  font-size:2.1rem;
+  margin-bottom:6px;
+  line-height:1.1;
+}
+@media (prefers-reduced-motion:no-preference){
+  #stars span{
+    display:inline-block;
+    animation:starIn .6s cubic-bezier(.3,1.6,.5,1) both;
+  }
+}
+@keyframes starIn{
+  from{transform:scale(0) rotate(-120deg)}
+  to{transform:scale(1) rotate(0)}
+}
+#win p{
+  margin:0 0 18px;
+  line-height:1.45;
+  font-size:1.05rem;
+}
+#next{
+  background:var(--accent);
+  color:#fff;
+  border-color:var(--accent-dark);
+  box-shadow:0 4px 0 var(--accent-dark);
+  font-size:1.125rem;
+  font-weight:700;
+  width:100%;
+  min-block-size:52px;
+}
+#next:active:not(:disabled){
+  box-shadow:0 1px 0 var(--accent-dark);
+}
+.modal-dialog[open]{
+  margin:auto;
+  width:min(92vw,360px);
+}
+.modal-dialog .card{
+  width:100%;
+  text-align:left;
+}
+.modal-dialog h2{
+  font-size:1.4rem;
+  margin:0 0 10px;
+  color:var(--ink);
+}
+.modal-dialog p{
+  margin:0 0 16px;
+  line-height:1.45;
+  font-size:1rem;
+}
+.dialog-actions{
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+  margin-top:16px;
+}
+.dialog-actions button{
+  flex:1 1 120px;
+  min-block-size:48px;
+  font-weight:700;
+}
+.btn-primary{
+  background:var(--accent);
+  color:#fff;
+  border-color:var(--accent-dark);
+  box-shadow:0 4px 0 var(--accent-dark);
+}
+.btn-primary:active:not(:disabled){
+  box-shadow:0 1px 0 var(--accent-dark);
+}
+.field-label{
+  display:block;
+  font-weight:700;
+  margin-bottom:8px;
+}
+#jump-input{
+  width:100%;
+  min-block-size:48px;
+  font-size:1.2rem;
+  padding:8px 12px;
+  border:2px solid var(--edge);
+  border-radius:12px;
+  background:#fff;
+  color:var(--ink);
+}
+.check-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:14px;
+  min-block-size:44px;
+  cursor:pointer;
+}
+.check-row input{
+  width:22px;
+  height:22px;
+  accent-color:var(--accent);
+  flex:0 0 auto;
+}
+</style>
+</head>
+<body>
+
+<header id="hdr">
+  <h1>Tubos de Cor</h1>
+  <div class="hdr-controls">
+    <button type="button" id="install-app" hidden>📲 Instalar</button>
+    <button type="button" id="symbols" class="icon-btn" aria-pressed="false" aria-label="Mostrar símbolos nas cores" title="Símbolos nas cores">◆</button>
+    <button type="button" id="mute" class="icon-btn" aria-pressed="false" aria-label="Silenciar sons" title="Som">🔊</button>
+    <div id="lvl" role="status" aria-live="off">Nível 1</div>
+  </div>
+</header>
+
+<main>
+  <div id="banner" aria-live="polite"></div>
+  <button type="button" id="next-inline" hidden>Próximo nível ✨</button>
+  <div id="board" role="group" aria-label="Tabuleiro de tubos"></div>
+</main>
+
+<footer id="ftr">
+  <button type="button" id="undo">
+    <span class="lbl">↶ Desfazer</span>
+    <span class="sub" id="undo-sub">&nbsp;</span>
+  </button>
+  <button type="button" id="extra">
+    <span class="lbl">➕ Tubo extra</span>
+    <span class="sub" id="extra-sub">&nbsp;</span>
+  </button>
+  <button type="button" id="reset">
+    <span class="lbl">⟳ Reiniciar</span>
+    <span class="sub" id="reset-sub">&nbsp;</span>
+  </button>
+</footer>
+
+<dialog id="win" aria-labelledby="wintitle">
+  <canvas id="fx" aria-hidden="true"></canvas>
+  <div class="card">
+    <div id="stars" aria-hidden="true"></div>
+    <h2 id="wintitle">Uhuuu!</h2>
+    <p id="winmsg"></p>
+    <button type="button" id="next" autofocus>Próximo nível ✨</button>
+  </div>
+</dialog>
+
+<dialog id="confirm-reset" class="modal-dialog" aria-labelledby="reset-title">
+  <div class="card">
+    <h2 id="reset-title">Reiniciar este nível?</h2>
+    <p id="reset-desc">Suas jogadas atuais neste nível serão desfeitas.</p>
+    <form method="dialog">
+      <div class="dialog-actions">
+        <button type="submit" value="cancel" autofocus>Continuar jogando</button>
+        <button type="submit" value="confirm" class="btn-primary">Sim, reiniciar</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<dialog id="jump-dialog" class="modal-dialog" aria-labelledby="jump-title">
+  <div class="card">
+    <h2 id="jump-title">Ir para outro nível</h2>
+    <form method="dialog" id="jump-form">
+      <label class="field-label" for="jump-input">Número do nível (1 a 9.999.999):</label>
+      <input id="jump-input" type="number" inputmode="numeric" min="1" max="9999999" required>
+      <label class="check-row" for="jump-save">
+        <input id="jump-save" type="checkbox">
+        <span>Salvar como progresso atual</span>
+      </label>
+      <div class="dialog-actions">
+        <button type="submit" value="cancel" formnovalidate>Cancelar</button>
+        <button type="submit" value="confirm" class="btn-primary">Ir para nível</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<script>
+(() => {
+  'use strict';
+
+  const COLORS = [
+    { bg: '#7B4B24', fg: '#ffffff', sym: '●', name: 'Marrom' },
+    { bg: '#E69F00', fg: '#1f140d', sym: '▲', name: 'Ouro' },
+    { bg: '#56B4E9', fg: '#1f140d', sym: '■', name: 'Azul-claro' },
+    { bg: '#00805E', fg: '#ffffff', sym: '★', name: 'Verde' },
+    { bg: '#F0E442', fg: '#1f140d', sym: '◆', name: 'Amarelo' },
+    { bg: '#00639E', fg: '#ffffff', sym: '✚', name: 'Azul' },
+    { bg: '#C74D00', fg: '#ffffff', sym: '▼', name: 'Laranja' },
+    { bg: '#CC79A7', fg: '#1f140d', sym: '⬟', name: 'Rosa' }
+  ];
+
+  const UNDO_WAIT = 20 * 1000;
+  const EXTRA_WAIT = 15 * 60 * 1000;
+  const MAX_HISTORY = 500;
+  const MAX_LEVEL = 9999999;
+
+  const KEY_LVL = 'tubos_nivel';
+  const KEY_STATE = 'tubos_state';
+  const KEY_EXTRA = 'tubos_extra';
+  const KEY_UNDO = 'tubos_undo';
+  const KEY_PREFS = 'tubos_prefs';
+
+  const $ = id => document.getElementById(id);
+  const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const prefersReducedMotion = () => reducedMotionQuery.matches;
+
+  let CAP = 4;
+  let level = 1;
+  let tubes = [];
+  let revealed = [];
+  let moveHistory = [];
+  let sel = null;
+  let surprise = false;
+  let oneEmptyLevel = false;
+  let breatherLevel = false;
+  let extraUsed = 0;
+  let muted = false;
+  let showSymbols = false;
+  let testMode = false;
+  let solvedPendingNext = false;
+
+  let ac = null;
+  let noiseBuf = null;
+  let flash = null;
+  let busy = false;
+  let lastUndoAt = 0;
+  let lastExtraAt = 0;
+
+  let genToken = 0;
+  let moveToken = 0;
+  let activeAnim = null;
+  let winTimer = null;
+  let sparkleTimer = null;
+  let fxRaf = 0;
+  let tickTimer = null;
+  let tubeEls = [];
+
+  /* ---------- Utilitários & Persistência ---------- */
+  function storageGet(k) {
+    try { return localStorage.getItem(k); } catch (e) { return null; }
+  }
+  function storageSet(k, v) {
+    try { localStorage.setItem(k, v); } catch (e) {}
+  }
+  function storageDel(k) {
+    try { localStorage.removeItem(k); } catch (e) {}
+  }
+  function clampTimestamp(ts) {
+    const now = Date.now();
+    if (!Number.isFinite(ts) || ts <= 0) return 0;
+    return ts > now ? now : ts;
+  }
+  function savePrefs() {
+    storageSet(KEY_PREFS, JSON.stringify({ muted, showSymbols }));
+  }
+  function loadPrefs() {
+    try {
+      const raw = storageGet(KEY_PREFS);
+      if (!raw) return;
+      const p = JSON.parse(raw);
+      muted = Boolean(p.muted);
+      showSymbols = Boolean(p.showSymbols);
+    } catch (e) {}
+  }
+  function saveGameState() {
+    if (testMode) return;
+    storageSet(KEY_LVL, String(level));
+    if (solvedPendingNext) {
+      storageDel(KEY_STATE);
+      return;
+    }
+    try {
+      storageSet(KEY_STATE, JSON.stringify({
+        level,
+        tubes,
+        revealed,
+        moveHistory: moveHistory.slice(-MAX_HISTORY),
+        extraUsed
+      }));
+    } catch (e) {}
+  }
+  function loadSavedStateFor(n) {
+    if (testMode) return null;
+    try {
+      const raw = storageGet(KEY_STATE);
+      if (!raw) return null;
+      const s = JSON.parse(raw);
+      if (!s || s.level !== n || !Array.isArray(s.tubes)) return null;
+      const p = params(n);
+      if (!s.tubes.every(t => Array.isArray(t) && t.length <= p.cap && t.every(c => Number.isInteger(c) && c >= 0 && c < p.colors))) {
+        return null;
+      }
+      if (isSolved(s.tubes)) return null;
+      return s;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function vibrate(pattern) {
+    if (muted || prefersReducedMotion()) return;
+    try {
+      if (navigator.vibrate) navigator.vibrate(pattern);
+    } catch (e) {}
+  }
+
+  function yieldToMain() {
+    if (typeof window.scheduler === 'object' && window.scheduler && typeof window.scheduler.yield === 'function') {
+      return window.scheduler.yield();
+    }
+    return new Promise(resolve => setTimeout(resolve, 0));
+  }
+
+  /* ---------- Geração de Níveis (Linear, Ilimitada e 100% Solúvel) ---------- */
+  function mix32(h) {
+    h = Math.imul(h ^ (h >>> 16), 0x85ebca6b);
+    h = Math.imul(h ^ (h >>> 13), 0xc2b2ae35);
+    return (h ^ (h >>> 16)) >>> 0;
+  }
+  function seedFor(n, attempt) {
+    const hi = Math.floor(n / 0x100000000) >>> 0;
+    const lo = n >>> 0;
+    return mix32(mix32(lo ^ 0x9e3779b9) ^ mix32((attempt + 1) * 0x85ebca6b) ^ mix32(hi + 0x27d4eb2d));
+  }
+  function rng(seed) {
+    let s = seed >>> 0;
+    return () => {
+      s = (s + 0x6D2B79F5) >>> 0;
+      let t = Math.imul(s ^ (s >>> 15), 1 | s);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function isSolved(T) {
+    const seen = new Set();
+    for (const t of T) {
+      if (!t.length) continue;
+      for (let i = 1; i < t.length; i++) if (t[i] !== t[0]) return false;
+      if (seen.has(t[0])) return false;
+      seen.add(t[0]);
+    }
+    return true;
+  }
+  function hasPreSolved(T, C) {
+    for (const t of T) {
+      if (t.length === C) {
+        let same = true;
+        for (let i = 1; i < t.length; i++) if (t[i] !== t[0]) { same = false; break; }
+        if (same) return true;
+      }
+    }
+    return false;
+  }
+  function isOneEmptyBase(k) {
+    if (k < 16 || k % 10 === 0) return false;
+    if (k > 180 && k % 10 === 5) return false;
+    const pOne = Math.min(0.25, 0.15 + ((k - 16) / 84) * 0.10);
+    return rng(seedFor(k, 777))() < pOne;
+  }
+  function params(n) {
+    let base;
+    if (n <= 5) base = { colors: 3, cap: 4, empties: 2, gentle: true, breather: false };
+    else if (n <= 15) base = { colors: 3, cap: 4, empties: 2, gentle: false, breather: false };
+    else if (n <= 30) base = { colors: 4, cap: 4, empties: 2, gentle: false, breather: false };
+    else if (n <= 50) base = { colors: 5, cap: 4, empties: 2, gentle: false, breather: false };
+    else if (n <= 75) base = { colors: 5, cap: 5, empties: 2, gentle: false, breather: false };
+    else if (n <= 105) base = { colors: 6, cap: 5, empties: 2, gentle: false, breather: false };
+    else if (n <= 140) base = { colors: 7, cap: 5, empties: 2, gentle: false, breather: false };
+    else if (n <= 180) base = { colors: 7, cap: 6, empties: 2, gentle: false, breather: false };
+    else if (n % 10 === 5) base = { colors: 7, cap: 5, empties: 2, gentle: false, breather: true };
+    else base = { colors: 8, cap: 6, empties: 2, gentle: false, breather: false };
+
+    const oneEmpty = isOneEmptyBase(n) && !isOneEmptyBase(n - 1);
+    if (oneEmpty) base.empties = 1;
+    base.oneEmpty = oneEmpty;
+    return base;
+  }
+  function makeGentleBoard(colors, cap, n, seed) {
+    const R = rng(seed);
+    const T = [];
+    for (let c = 0; c < colors; c++) T.push(Array(cap).fill(c));
+    const swaps = 2 + n;
+    for (let k = 0; k < swaps; k++) {
+      const a = Math.floor(R() * colors);
+      const b = (a + 1 + Math.floor(R() * (colors - 1))) % colors;
+      const ia = Math.floor(R() * cap);
+      const ib = Math.floor(R() * cap);
+      const tmp = T[a][ia];
+      T[a][ia] = T[b][ib];
+      T[b][ib] = tmp;
+    }
+    T.push([], []);
+    return T;
+  }
+  function makeBoard2Empty(colors, cap, seed) {
+    const R = rng(seed);
+    const pool = [];
+    for (let c = 0; c < colors; c++) {
+      for (let k = 0; k < cap; k++) pool.push(c);
+    }
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(R() * (i + 1));
+      const tmp = pool[i];
+      pool[i] = pool[j];
+      pool[j] = tmp;
+    }
+    const T = [];
+    for (let i = 0; i < colors; i++) T.push(pool.slice(i * cap, (i + 1) * cap));
+    T.push([], []);
+    return T;
+  }
+  function makeReverse1Empty(colors, cap, steps, seed) {
+    const R = rng(seed);
+    const T = [];
+    for (let c = 0; c < colors; c++) T.push(Array(cap).fill(c));
+    T.push([]);
+    let lastDest = -1;
+    for (let step = 0; step < steps; step++) {
+      const cands = [];
+      for (let a = 0; a < T.length; a++) {
+        const A = T[a];
+        if (!A.length) continue;
+        const c = A[A.length - 1];
+        let run = 1;
+        for (let i = A.length - 2; i >= 0 && A[i] === c; i--) run++;
+        const maxK = (run === A.length) ? run : run - 1;
+        if (maxK <= 0) continue;
+        for (let b = 0; b < T.length; b++) {
+          if (a === b) continue;
+          const space = cap - T[b].length;
+          if (space <= 0) continue;
+          const topK = Math.min(maxK, space);
+          const sameTop = T[b].length > 0 && T[b][T[b].length - 1] === c;
+          const emptiesA = run === A.length && topK === run;
+          const w = (sameTop ? 1 : 8) * (a === lastDest ? 1 : 3) * (step > steps - 18 && emptiesA ? 6 : 1);
+          cands.push({ a, b, topK, emptiesA, w });
+        }
+      }
+      if (!cands.length) break;
+      let sum = 0;
+      for (const x of cands) sum += x.w;
+      let pick = R() * sum;
+      let chosen = cands[cands.length - 1];
+      for (const x of cands) {
+        pick -= x.w;
+        if (pick <= 0) { chosen = x; break; }
+      }
+      const k = (step > steps - 18 && chosen.emptiesA)
+        ? chosen.topK
+        : 1 + Math.floor(R() * Math.min(chosen.topK, 2));
+      for (let i = 0; i < k; i++) T[chosen.b].push(T[chosen.a].pop());
+      lastDest = chosen.b;
+      if (step >= steps - 22 && T.filter(t => t.length === 0).length === 1 && !hasPreSolved(T, cap)) {
+        const ei = T.findIndex(t => t.length === 0);
+        if (ei >= 0 && ei !== T.length - 1) T.push(T.splice(ei, 1)[0]);
+        break;
+      }
+    }
+    return T;
+  }
+  function solveIter(T0, C, nodeLimit = 25000) {
+    const memo = new Set();
+    const key = T => T.map(t => t.join(',')).sort().join('|');
+    const stack = [{ T: T0, depth: 0 }];
+    let nodes = 0;
+    while (stack.length) {
+      const { T, depth } = stack.pop();
+      if (isSolved(T)) return { depth, nodes };
+      if (++nodes > nodeLimit) return { depth: -1, nodes };
+      const k = key(T);
+      if (memo.has(k)) continue;
+      memo.add(k);
+      const moves = [];
+      const emptySeen = new Set();
+      for (let s = 0; s < T.length; s++) {
+        const S = T[s];
+        if (!S.length) continue;
+        const c = S[S.length - 1];
+        let monoS = true;
+        for (let i = 0; i < S.length - 1; i++) if (S[i] !== c) { monoS = false; break; }
+        if (monoS && S.length === C) continue;
+        let run = 1;
+        for (let i = S.length - 2; i >= 0 && S[i] === c; i--) run++;
+        for (let d = 0; d < T.length; d++) {
+          if (s === d) continue;
+          const D = T[d];
+          if (D.length >= C) continue;
+          if (!D.length) {
+            if (monoS || emptySeen.has(s)) continue;
+            emptySeen.add(s);
+            moves.push({ s, d, kk: run, score: 10 });
+            continue;
+          }
+          if (D[D.length - 1] !== c) continue;
+          const space = C - D.length;
+          const kk = Math.min(run, space);
+          let monoD = true;
+          for (let i = 0; i < D.length - 1; i++) if (D[i] !== c) { monoD = false; break; }
+          let score = monoD ? -30 : -15;
+          if (monoD && D.length + kk === C) score -= 20;
+          if (kk === S.length) score -= 10;
+          if (kk < run) score += 12;
+          moves.push({ s, d, kk, score });
+        }
+      }
+      moves.sort((a, b) => b.score - a.score);
+      for (const m of moves) {
+        const N = T.map(t => t.slice());
+        for (let x = 0; x < m.kk; x++) N[m.d].push(N[m.s].pop());
+        stack.push({ T: N, depth: depth + 1 });
+      }
+    }
+    return { depth: -1, nodes };
+  }
+  async function genLevelAsync(n, token) {
+    const p = params(n);
+    const C = p.cap;
+    let minDepth, maxDepth = Infinity;
+    if (p.gentle) {
+      minDepth = n === 1 ? 3 : (n === 2 ? 5 : 6);
+      maxDepth = n === 1 ? 7 : (n === 2 ? 8 : 11);
+    } else if (p.oneEmpty) {
+      minDepth = p.colors + 3;
+    } else {
+      minDepth = p.colors * 2;
+    }
+
+    let deadline = performance.now() + 35;
+    for (let a = 0; a < 80; a++) {
+      if (token !== genToken) return null;
+      const seed = seedFor(n, a);
+      const T = p.gentle
+        ? makeGentleBoard(p.colors, C, n, seed)
+        : (p.oneEmpty
+          ? makeReverse1Empty(p.colors, C, p.colors * C * 5, seed)
+          : makeBoard2Empty(p.colors, C, seed));
+
+      const emptyCount = T.filter(t => t.length === 0).length;
+      if (emptyCount === p.empties && !isSolved(T) && !hasPreSolved(T, C)) {
+        const r = solveIter(T, C);
+        const targetMin = a < 40 ? minDepth : 3;
+        const targetMax = a < 40 ? maxDepth : Infinity;
+        if (r.depth >= targetMin && r.depth <= targetMax) {
+          return { tubes: T, oneEmpty: p.oneEmpty };
+        }
+      }
+      if (performance.now() >= deadline) {
+        await yieldToMain();
+        deadline = performance.now() + 35;
+      }
+    }
+
+    // Garantia absoluta: tenta até achar tabuleiro verificado em 2 vazios se 1 vazio falhou 80x.
+    for (let a = 0; a < 200; a++) {
+      if (token !== genToken) return null;
+      const T = makeBoard2Empty(p.colors, C, seedFor(n, 5000 + a));
+      if (!isSolved(T) && !hasPreSolved(T, C)) {
+        const r = solveIter(T, C);
+        if (r.depth >= 3) return { tubes: T, oneEmpty: false };
+      }
+      if (performance.now() >= deadline) {
+        await yieldToMain();
+        deadline = performance.now() + 35;
+      }
+    }
+    return null;
+  }
+
+  /* ---------- Regras do Jogo ---------- */
+  function canMove(s, d) {
+    if (s === d) return false;
+    const S = tubes[s];
+    const D = tubes[d];
+    if (!S || !D || !S.length || D.length >= CAP) return false;
+    return D.length === 0 || D[D.length - 1] === S[S.length - 1];
+  }
+  function moveBalls(s, d) {
+    const S = tubes[s];
+    const D = tubes[d];
+    const c = S[S.length - 1];
+    let run = 0;
+    for (let x = S.length - 1; x >= 0 && S[x] === c; x--) run++;
+    const k = Math.min(run, CAP - D.length);
+    for (let x = 0; x < k; x++) D.push(S.pop());
+    return k;
+  }
+  function isTubeDone(t) {
+    if (t.length !== CAP) return false;
+    for (let i = 1; i < t.length; i++) if (t[i] !== t[0]) return false;
+    return true;
+  }
+  function isTubeMono(t) {
+    for (let i = 1; i < t.length; i++) if (t[i] !== t[0]) return false;
+    return true;
+  }
+  function hasAnyUsefulMove() {
+    for (let s = 0; s < tubes.length; s++) {
+      const S = tubes[s];
+      if (!S.length || isTubeDone(S)) continue;
+      const monoS = isTubeMono(S);
+      for (let d = 0; d < tubes.length; d++) {
+        if (!canMove(s, d)) continue;
+        if (!tubes[d].length && monoS) continue;
+        return true;
+      }
+    }
+    return false;
+  }
+  function syncRevealed() {
+    if (!surprise) return;
+    for (let i = 0; i < tubes.length; i++) {
+      const t = tubes[i];
+      if (!revealed[i] || revealed[i].length !== t.length) {
+        revealed[i] = Array(t.length).fill(false);
+      }
+      if (!t.length) continue;
+      if (isTubeDone(t)) {
+        revealed[i].fill(true);
+        continue;
+      }
+      const top = t[t.length - 1];
+      for (let j = t.length - 1; j >= 0 && t[j] === top; j--) {
+        revealed[i][j] = true;
+      }
+    }
+  }
+  function isVis(i, j) {
+    if (!surprise) return true;
+    return Boolean(revealed[i] && revealed[i][j]);
+  }
+
+  /* ---------- Layout Responsivo (Sem Rolagem em Android) ---------- */
+  function chooseLayout(count, cap, availW, availH) {
+    let best = null;
+    for (let rows = 1; rows <= 3; rows++) {
+      const cols = Math.ceil(count / rows);
+      if (rows > 1 && cols < 3) continue;
+      const gx = cols >= 6 ? 8 : 12;
+      const gy = rows >= 3 ? 20 : 26;
+      const maxTwByW = Math.floor((availW - (cols - 1) * gx) / cols);
+      const maxThByH = Math.floor((availH - (rows - 1) * gy - 28) / rows);
+      if (maxTwByW < 34 || maxThByH < cap * 16 + 14) continue;
+      const tw = Math.min(70, maxTwByW);
+      const seg = Math.max(18, Math.min(44, Math.floor((maxThByH - 14) / cap)));
+      const th = cap * seg + 14;
+      const totalH = rows * th + (rows - 1) * gy + 28;
+      if (totalH > availH + 4) continue;
+      const score = Math.min(tw, seg * 1.6) - (rows === 3 ? 6 : 0);
+      if (!best || score > best.score) {
+        best = { rows, cols, tw, seg, th, gx, gy, score };
+      }
+    }
+    if (!best) {
+      const rows = count > 6 ? 2 : 1;
+      const cols = Math.ceil(count / rows);
+      const gx = 8;
+      const gy = 22;
+      const tw = Math.max(44, Math.min(64, Math.floor((availW - (cols - 1) * gx) / cols)));
+      const seg = Math.max(20, Math.min(38, Math.floor((availH - (rows - 1) * gy - 28) / rows - 14) / cap));
+      const segInt = Math.floor(seg);
+      best = { rows, cols, tw, seg: segInt, th: cap * segInt + 14, gx, gy };
+    }
+    return best;
+  }
+
+  function layoutBoard() {
+    const count = tubes.length;
+    if (!count) return;
+    const landscapeShort = window.innerWidth > window.innerHeight && window.innerHeight < 500;
+    const shellMax = landscapeShort ? Math.min(720, document.documentElement.clientWidth - 24) : 560;
+    document.documentElement.style.setProperty('--shell-max', shellMax + 'px');
+
+    const hdrH = $('hdr').offsetHeight;
+    const banH = $('banner').offsetHeight;
+    const nextH = $('next-inline').hidden ? 0 : $('next-inline').offsetHeight + 8;
+    const ftrH = $('ftr').offsetHeight;
+    const availW = Math.max(260, Math.min(shellMax, document.documentElement.clientWidth - 24));
+    const availH = Math.max(200, window.innerHeight - (hdrH + banH + nextH + ftrH + 44));
+
+    const L = chooseLayout(count, CAP, availW, availH);
+    const boardMax = Math.min(availW, L.cols * L.tw + (L.cols - 1) * L.gx + 8);
+    const rootStyle = document.documentElement.style;
+    rootStyle.setProperty('--tw', L.tw + 'px');
+    rootStyle.setProperty('--seg', L.seg + 'px');
+    rootStyle.setProperty('--th', L.th + 'px');
+    rootStyle.setProperty('--gx', L.gx + 'px');
+    rootStyle.setProperty('--gy', L.gy + 'px');
+    rootStyle.setProperty('--board-max', boardMax + 'px');
+    rootStyle.setProperty('--blob-w', Math.max(24, Math.round(L.tw * 0.56)) + 'px');
+    rootStyle.setProperty('--blob-h', Math.max(18, Math.round(L.seg * 0.72)) + 'px');
+  }
+
+  /* ---------- Renderização Incremental & Acessível ---------- */
+  function describeTube(i) {
+    const t = tubes[i];
+    const num = i + 1;
+    if (!t.length) return `Tubo ${num}: vazio`;
+    if (isTubeDone(t)) return `Tubo ${num}: completo, ${COLORS[t[0]].name}`;
+    const topIdx = t.length - 1;
+    const topName = COLORS[t[topIdx]].name;
+    let suffix = `Tubo ${num}: topo ${topName}, ${t.length} de ${CAP}`;
+    if (sel === i) suffix += ', selecionado';
+    return suffix;
+  }
+
+  function renderTubeContent(i) {
+    const btn = tubeEls[i];
+    if (!btn) return;
+    const t = tubes[i];
+    const done = isTubeDone(t);
+    btn.classList.toggle('sel', sel === i);
+    btn.classList.toggle('done', done);
+    btn.setAttribute('aria-pressed', sel === i ? 'true' : 'false');
+    btn.setAttribute('aria-label', describeTube(i));
+
+    const inner = btn.querySelector('.tube-inner');
+    inner.innerHTML = '';
+    for (let j = 0; j < t.length; j++) {
+      const c = t[j];
+      const seg = document.createElement('span');
+      seg.className = 'seg';
+      if (!isVis(i, j)) {
+        seg.classList.add('cov');
+        seg.textContent = '?';
+      } else {
+        const col = COLORS[c];
+        seg.style.background = col.bg;
+        if (j > 0 && (!isVis(i, j - 1) || t[j - 1] !== c)) {
+          seg.classList.add('edge');
+        }
+        const sym = document.createElement('span');
+        sym.className = 'sym';
+        sym.style.color = col.fg;
+        sym.setAttribute('aria-hidden', 'true');
+        sym.textContent = col.sym;
+        seg.appendChild(sym);
+      }
+      if (flash && flash.to === i && j >= t.length - flash.n) {
+        seg.classList.add('incoming');
+      }
+      inner.appendChild(seg);
+    }
+  }
+
+  function createTubeButton(i) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'tube';
+    btn.innerHTML = '<span class="tube-done" aria-hidden="true">✓</span><span class="tube-inner"></span>';
+    btn.addEventListener('click', () => tap(i));
+    return btn;
+  }
+
+  function buildBoard() {
+    const board = $('board');
+    board.innerHTML = '';
+    tubeEls = [];
+    for (let i = 0; i < tubes.length; i++) {
+      const btn = createTubeButton(i);
+      tubeEls.push(btn);
+      board.appendChild(btn);
+      renderTubeContent(i);
+    }
+  }
+
+  function syncBoard(indices) {
+    if (tubeEls.length !== tubes.length) {
+      buildBoard();
+      return;
+    }
+    const list = indices || tubes.map((_, idx) => idx);
+    for (const i of list) renderTubeContent(i);
+  }
+
+  /* ---------- Cancelamento Seguro de Animações & Timers ---------- */
+  function stopConfetti() {
+    if (fxRaf) {
+      cancelAnimationFrame(fxRaf);
+      fxRaf = 0;
+    }
+    const canvas = $('fx');
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+
+  function cancelPending() {
+    moveToken++;
+    if (activeAnim) {
+      try { activeAnim.cancel(); } catch (e) {}
+      activeAnim = null;
+    }
+    if (winTimer) { clearTimeout(winTimer); winTimer = null; }
+    if (sparkleTimer) { clearTimeout(sparkleTimer); sparkleTimer = null; }
+    stopConfetti();
+    document.querySelectorAll('.blob').forEach(b => b.remove());
+    flash = null;
+    busy = false;
+  }
+
+  /* ---------- Fluxo Principal & Jogadas ---------- */
+  function defaultBanner() {
+    if (level === 1 && !moveHistory.length) {
+      return 'Toque em um tubo para pegar a cor do topo e depois toque onde colocar.';
+    }
+    if (surprise) return '✨ Nível surpresa: descubra as cores escondidas!';
+    if (oneEmptyLevel) return '🔎 Atenção: apenas 1 tubo vazio neste nível!';
+    if (breatherLevel) return '🌿 Nível leve para respirar um pouco.';
+    return '';
+  }
+
+  function updateBanner(overrideMsg) {
+    if (overrideMsg !== undefined) {
+      $('banner').textContent = overrideMsg;
+      return;
+    }
+    if (solvedPendingNext) {
+      $('banner').textContent = 'Nível concluído! Toque em "Próximo nível" para continuar.';
+      return;
+    }
+    if (!isSolved(tubes) && !hasAnyUsefulMove()) {
+      $('banner').textContent = 'Sem jogadas possíveis — use Desfazer, Tubo extra ou Reiniciar.';
+      return;
+    }
+    $('banner').textContent = defaultBanner();
+  }
+
+  async function loadLevel(n, options = {}) {
+    const keepExtra = Boolean(options.keepExtra);
+    const prevExtra = keepExtra ? extraUsed : 0;
+
+    cancelPending();
+    const token = ++genToken;
+    solvedPendingNext = false;
+    $('next-inline').hidden = true;
+    const winDlg = $('win');
+    if (winDlg.open) winDlg.close();
+
+    level = Math.max(1, Math.min(MAX_LEVEL, n));
+    const p = params(level);
+    CAP = p.cap;
+    surprise = level % 10 === 0;
+    breatherLevel = Boolean(p.breather);
+    oneEmptyLevel = p.oneEmpty;
+
+    $('lvl').textContent = 'Nível ' + level + (testMode ? ' (Teste)' : '');
+
+    const saved = !keepExtra ? loadSavedStateFor(level) : null;
+    if (saved) {
+      tubes = saved.tubes;
+      revealed = Array.isArray(saved.revealed) ? saved.revealed : [];
+      moveHistory = Array.isArray(saved.moveHistory) ? saved.moveHistory : [];
+      extraUsed = Number.isInteger(saved.extraUsed) ? saved.extraUsed : 0;
+      oneEmptyLevel = tubes.length === p.colors + extraUsed + 1;
+    } else {
+      $('banner').textContent = 'Preparando nível ' + level + '…';
+      const generated = await genLevelAsync(level, token);
+      if (!generated || token !== genToken) return;
+      tubes = generated.tubes;
+      oneEmptyLevel = generated.oneEmpty;
+      extraUsed = prevExtra;
+      for (let e = 0; e < extraUsed; e++) tubes.push([]);
+      revealed = surprise ? tubes.map(t => Array(t.length).fill(false)) : [];
+      moveHistory = [];
+    }
+
+    sel = null;
+    syncRevealed();
+    buildBoard();
+    updateBanner();
+    layoutBoard();
+    updateButtons();
+    saveGameState();
+  }
+
+  function tap(i) {
+    if (busy) return;
+    if (solvedPendingNext) {
+      advanceNext();
+      return;
+    }
+    ensureAudio();
+
+    if (sel === null) {
+      if (tubes[i].length) {
+        sel = i;
+        sfx('select');
+        vibrate(10);
+        syncBoard([i]);
+      } else {
+        sfx('nope');
+        vibrate([15, 25, 15]);
+        nopeAt(i);
+      }
+      return;
+    }
+
+    if (sel === i) {
+      sel = null;
+      sfx('select');
+      syncBoard([i]);
+      return;
+    }
+
+    if (canMove(sel, i)) {
+      const from = sel;
+      const prevRevealed = surprise ? revealed.map(r => r.slice()) : null;
+      const color = tubes[from][tubes[from].length - 1];
+      const srcEl = tubeEls[from];
+      const dstEl = tubeEls[i];
+      const srcRect = srcEl.getBoundingClientRect();
+      const dstRect = dstEl.getBoundingClientRect();
+
+      const k = moveBalls(from, i);
+      const entry = { from, to: i, count: k };
+      if (prevRevealed) entry.prevRevealed = prevRevealed;
+      moveHistory.push(entry);
+      if (moveHistory.length > MAX_HISTORY) moveHistory.shift();
+
+      const full = isTubeDone(tubes[i]);
+      sel = null;
+      syncRevealed();
+      flash = { to: i, n: k };
+      busy = true;
+      const tok = moveToken;
+
+      sfx(full ? 'complete' : 'pour');
+      vibrate(full ? [18, 30, 24] : 12);
+      syncBoard([from, i]);
+      updateButtons();
+      saveGameState();
+
+      pourBlob(srcRect, dstRect, color, () => {
+        if (tok !== moveToken) return;
+        flash = null;
+        if (isSolved(tubes)) {
+          solvedPendingNext = true;
+          if (!testMode) {
+            storageSet(KEY_LVL, String(level + 1));
+            storageDel(KEY_STATE);
+          }
+          winTimer = setTimeout(() => {
+            if (tok !== moveToken) return;
+            busy = false;
+            win();
+          }, 220);
+        } else {
+          busy = false;
+          updateBanner();
+        }
+      });
+    } else if (tubes[i].length) {
+      const prev = sel;
+      sel = i;
+      sfx('select');
+      vibrate(10);
+      syncBoard([prev, i]);
+    } else {
+      const prev = sel;
+      sel = null;
+      sfx('nope');
+      vibrate([15, 25, 15]);
+      syncBoard([prev]);
+      nopeAt(i);
+    }
+  }
+
+  function pourBlob(srcRect, dstRect, color, done) {
+    if (prefersReducedMotion()) {
+      setTimeout(done, 240);
+      return;
+    }
+    const blob = document.createElement('div');
+    blob.className = 'blob';
+    blob.style.background = COLORS[color].bg;
+    document.body.appendChild(blob);
+
+    const bw = blob.offsetWidth || 34;
+    const sx = srcRect.left + srcRect.width / 2 - bw / 2;
+    const sy = srcRect.top - 10;
+    const dx = (dstRect.left + dstRect.width / 2 - bw / 2) - sx;
+    const dy = (dstRect.top - 4) - sy;
+    blob.style.left = sx + 'px';
+    blob.style.top = sy + 'px';
+
+    let settled = false;
+    const finishOnce = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(guardTimer);
+      activeAnim = null;
+      blob.remove();
+      done();
+    };
+    const guardTimer = setTimeout(finishOnce, 520);
+
+    try {
+      const anim = blob.animate([
+        { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+        { transform: `translate(${dx * 0.5}px, ${Math.min(0, dy) - 36}px) scale(1.12)`, opacity: 1, offset: 0.5 },
+        { transform: `translate(${dx}px, ${dy}px) scale(.85)`, opacity: 0.9 }
+      ], { duration: 420, easing: 'ease-in-out', fill: 'forwards' });
+      activeAnim = anim;
+      anim.onfinish = finishOnce;
+      anim.oncancel = finishOnce;
+    } catch (e) {
+      finishOnce();
+    }
+  }
+
+  function nopeAt(i) {
+    const el = tubeEls[i];
+    if (!el) return;
+    el.classList.remove('nope');
+    void el.offsetWidth;
+    el.classList.add('nope');
+    setTimeout(() => el.classList.remove('nope'), 380);
+  }
+
+  function undoReady() {
+    return Date.now() - lastUndoAt >= UNDO_WAIT;
+  }
+
+  function undo() {
+    if (busy || solvedPendingNext || !moveHistory.length || !undoReady()) return;
+    const last = moveHistory.pop();
+    for (let x = 0; x < last.count; x++) {
+      tubes[last.from].push(tubes[last.to].pop());
+    }
+    if (surprise && last.prevRevealed) {
+      revealed = last.prevRevealed.map(r => r.slice());
+    }
+    sel = null;
+    lastUndoAt = Date.now();
+    storageSet(KEY_UNDO, String(lastUndoAt));
+    sfx('select');
+    vibrate(10);
+    syncBoard([last.from, last.to]);
+    updateBanner();
+    updateButtons();
+    saveGameState();
+  }
+
+  function extraReady() {
+    return Date.now() - lastExtraAt >= EXTRA_WAIT;
+  }
+
+  function addExtraTube() {
+    if (busy || solvedPendingNext || !extraReady()) return;
+    tubes.push([]);
+    if (surprise) revealed.push([]);
+    extraUsed++;
+    lastExtraAt = Date.now();
+    storageSet(KEY_EXTRA, String(lastExtraAt));
+
+    const newIdx = tubes.length - 1;
+    const btn = createTubeButton(newIdx);
+    tubeEls.push(btn);
+    $('board').appendChild(btn);
+    renderTubeContent(newIdx);
+
+    sfx('complete');
+    vibrate([15, 20, 15]);
+    layoutBoard();
+    updateBanner();
+    updateButtons();
+    saveGameState();
+  }
+
+  function fmtWait(ms) {
+    const s = Math.max(1, Math.ceil(ms / 1000));
+    if (s >= 60) {
+      const m = Math.floor(s / 60);
+      const r = s % 60;
+      return m + ':' + String(r).padStart(2, '0');
+    }
+    return s + ' s';
+  }
+
+  function updateButtons() {
+    const now = Date.now();
+    const u = $('undo');
+    const uSub = $('undo-sub');
+    const waitU = UNDO_WAIT - (now - lastUndoAt);
+    if (solvedPendingNext || !moveHistory.length) {
+      u.disabled = true;
+      uSub.textContent = '\u00a0';
+    } else if (waitU > 0) {
+      u.disabled = true;
+      uSub.textContent = 'em ' + fmtWait(waitU);
+    } else {
+      u.disabled = false;
+      uSub.textContent = moveHistory.length === 1 ? '1 jogada' : `${moveHistory.length} jogadas`;
+    }
+
+    const e = $('extra');
+    const eSub = $('extra-sub');
+    const waitE = EXTRA_WAIT - (now - lastExtraAt);
+    if (solvedPendingNext) {
+      e.disabled = true;
+      eSub.textContent = '\u00a0';
+    } else if (waitE > 0) {
+      e.disabled = true;
+      eSub.textContent = 'em ' + fmtWait(waitE);
+    } else {
+      e.disabled = false;
+      eSub.textContent = extraUsed > 0 ? `${extraUsed} ativo` : 'disponível';
+    }
+
+    const r = $('reset');
+    const rSub = $('reset-sub');
+    r.disabled = solvedPendingNext || moveHistory.length === 0;
+    rSub.textContent = '\u00a0';
+  }
+
+  /* ---------- Finalização Festiva (<dialog> + Canvas Leve) ---------- */
+  function startConfettiCanvas() {
+    if (prefersReducedMotion()) return;
+    const canvas = $('fx');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const cols = [...COLORS.map(c => c.bg), '#fff6d5', '#ffd966', '#ffffff'];
+    const parts = Array.from({ length: 70 }, (_, i) => ({
+      x: Math.random() * w,
+      y: -20 - Math.random() * (h * 0.45),
+      vx: (Math.random() - 0.5) * 90,
+      vy: 140 + Math.random() * 190,
+      size: 7 + Math.random() * 6,
+      rot: Math.random() * Math.PI * 2,
+      vrot: (Math.random() - 0.5) * 8,
+      color: cols[i % cols.length]
+    }));
+
+    let last = performance.now();
+    const start = last;
+    function frame(now) {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      ctx.clearRect(0, 0, w, h);
+      let alive = false;
+      for (const p of parts) {
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.rot += p.vrot * dt;
+        if (p.y < h + 30) alive = true;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size / 2, -p.size * 0.35, p.size, p.size * 0.7);
+        ctx.restore();
+      }
+      if (alive && now - start < 3500) {
+        fxRaf = requestAnimationFrame(frame);
+      } else {
+        ctx.clearRect(0, 0, w, h);
+        fxRaf = 0;
+      }
+    }
+    fxRaf = requestAnimationFrame(frame);
+  }
+
+  function win() {
+    const tok = moveToken;
+    sfx('win');
+    vibrate([20, 40, 30]);
+    sparkleTimer = setTimeout(() => {
+      if (tok === moveToken) sfx('sparkle');
+    }, 450);
+
+    const titles = ['Uhuuu!', 'Arrasou!', 'Que capricho!', 'Muito bem!'];
+    $('wintitle').textContent = titles[level % titles.length];
+    $('winmsg').textContent = surprise
+      ? 'Você desvendou o nível surpresa sem ver tudo!'
+      : 'Todas as cores no seu lugar. Parabéns!';
+
+    const stars = $('stars');
+    stars.innerHTML = '';
+    for (let s = 0; s < 3; s++) {
+      const sp = document.createElement('span');
+      sp.textContent = '⭐';
+      sp.style.animationDelay = (0.12 + s * 0.18) + 's';
+      stars.appendChild(sp);
+    }
+
+    const dlg = $('win');
+    if (!dlg.open) dlg.showModal();
+    updateButtons();
+    updateBanner();
+    startConfettiCanvas();
+  }
+
+  function advanceNext() {
+    const dlg = $('win');
+    if (dlg.open) dlg.close();
+    cancelPending();
+    loadLevel(level + 1);
+  }
+
+  /* ---------- Áudio (Sintetizado, Suave e Cacheado) ---------- */
+  function ensureAudio() {
+    if (!ac) {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return null;
+      try { ac = new Ctx(); } catch (e) { return null; }
+    }
+    if (ac.state !== 'running') {
+      try { ac.resume().catch(() => {}); } catch (e) {}
+    }
+    return ac;
+  }
+  function getNoiseBuffer() {
+    if (!ac) return null;
+    if (noiseBuf) return noiseBuf;
+    const dur = 0.24;
+    const len = Math.floor(ac.sampleRate * dur);
+    const buf = ac.createBuffer(1, len, ac.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+    noiseBuf = buf;
+    return buf;
+  }
+  function tone(f, dur, type = 'sine', vol = 0.18, delay = 0, bend = 1) {
+    if (muted || !ensureAudio()) return;
+    const t = ac.currentTime + delay;
+    const o = ac.createOscillator();
+    const g = ac.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f, t);
+    if (bend !== 1) o.frequency.exponentialRampToValueAtTime(f * bend, t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(ac.destination);
+    o.start(t);
+    o.stop(t + dur + 0.05);
+  }
+  function bubble(delay = 0, dur = 0.24, vol = 0.2) {
+    if (muted || !ensureAudio()) return;
+    const buf = getNoiseBuffer();
+    if (!buf) return;
+    const t = ac.currentTime + delay;
+    const src = ac.createBufferSource();
+    src.buffer = buf;
+    const bp = ac.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.Q.value = 6;
+    bp.frequency.setValueAtTime(300, t);
+    bp.frequency.exponentialRampToValueAtTime(1100, t + dur);
+    const g = ac.createGain();
+    g.gain.value = vol;
+    src.connect(bp).connect(g).connect(ac.destination);
+    src.start(t);
+  }
+  function sfx(name) {
+    if (muted) return;
+    switch (name) {
+      case 'select':
+        tone(660, 0.12, 'sine', 0.12);
+        tone(990, 0.1, 'sine', 0.06, 0.04);
+        break;
+      case 'pour':
+        bubble(0, 0.24, 0.2);
+        tone(520, 0.2, 'sine', 0.1, 0.05, 1.7);
+        tone(780, 0.16, 'sine', 0.06, 0.12, 1.3);
+        break;
+      case 'complete':
+        [523, 659, 784].forEach((f, i) => tone(f, 0.35, 'triangle', 0.14, i * 0.09));
+        break;
+      case 'nope':
+        tone(300, 0.18, 'triangle', 0.1, 0, 0.8);
+        break;
+      case 'win':
+        [523, 659, 784, 988, 1319].forEach((f, i) => {
+          tone(f, 0.6, 'sine', 0.16, i * 0.11);
+          tone(f * 2, 0.3, 'sine', 0.04, i * 0.11);
+        });
+        break;
+      case 'sparkle':
+        [1568, 2093, 2637, 3136, 2637, 3136].forEach((f, i) => tone(f, 0.5, 'sine', 0.06, i * 0.08));
+        break;
+    }
+  }
+
+  /* ---------- UI, Diálogos Nativos & Eventos ---------- */
+  function applyPrefsUI() {
+    $('mute').textContent = muted ? '🔇' : '🔊';
+    $('mute').setAttribute('aria-pressed', String(muted));
+    $('mute').setAttribute('aria-label', muted ? 'Ativar sons' : 'Silenciar sons');
+
+    document.body.classList.toggle('show-symbols', showSymbols);
+    $('symbols').setAttribute('aria-pressed', String(showSymbols));
+    $('symbols').setAttribute('aria-label', showSymbols ? 'Ocultar símbolos nas cores' : 'Mostrar símbolos nas cores');
+  }
+
+  $('undo').addEventListener('click', undo);
+  $('extra').addEventListener('click', addExtraTube);
+  $('next').addEventListener('click', advanceNext);
+  $('next-inline').addEventListener('click', advanceNext);
+
+  $('win').addEventListener('close', () => {
+    stopConfetti();
+    if (sparkleTimer) { clearTimeout(sparkleTimer); sparkleTimer = null; }
+    if (solvedPendingNext) {
+      $('next-inline').hidden = false;
+      layoutBoard();
+      updateBanner();
+    }
+  });
+
+  $('reset').addEventListener('click', () => {
+    if (busy || solvedPendingNext || !moveHistory.length) return;
+    $('reset-desc').textContent = extraUsed > 0
+      ? 'Suas jogadas atuais serão desfeitas. Seu Tubo extra deste nível será mantido.'
+      : 'Suas jogadas atuais neste nível serão desfeitas.';
+    $('confirm-reset').showModal();
+  });
+
+  $('confirm-reset').addEventListener('close', () => {
+    const dlg = $('confirm-reset');
+    const action = dlg.returnValue;
+    dlg.returnValue = '';
+    if (action === 'confirm') {
+      loadLevel(level, { keepExtra: true });
+    }
+  });
+
+  $('mute').addEventListener('click', () => {
+    muted = !muted;
+    applyPrefsUI();
+    savePrefs();
+    if (!muted) { ensureAudio(); sfx('select'); }
+  });
+
+  $('symbols').addEventListener('click', () => {
+    showSymbols = !showSymbols;
+    applyPrefsUI();
+    savePrefs();
+    sfx('select');
+  });
+
+  // Modo de teste: segure "Nível N" por ~1 s para abrir o seletor nativo.
+  (function setupJumpHold() {
+    const lbl = $('lvl');
+    let timer = null;
+    let startX = 0;
+    let startY = 0;
+
+    const clear = () => {
+      if (timer) { clearTimeout(timer); timer = null; }
+    };
+    const openJump = () => {
+      clear();
+      $('jump-input').value = String(level);
+      $('jump-save').checked = !testMode;
+      $('jump-dialog').showModal();
+      setTimeout(() => $('jump-input').select(), 40);
+    };
+
+    lbl.addEventListener('contextmenu', e => e.preventDefault());
+    lbl.addEventListener('pointerdown', e => {
+      clear();
+      startX = e.clientX;
+      startY = e.clientY;
+      timer = setTimeout(openJump, 900);
+    });
+    lbl.addEventListener('pointermove', e => {
+      if (!timer) return;
+      if (Math.hypot(e.clientX - startX, e.clientY - startY) > 18) clear();
+    });
+    lbl.addEventListener('pointerup', clear);
+    lbl.addEventListener('pointercancel', clear);
+
+    $('jump-dialog').addEventListener('close', () => {
+      const dlg = $('jump-dialog');
+      const action = dlg.returnValue;
+      dlg.returnValue = '';
+      if (action !== 'confirm') return;
+      const n = parseInt($('jump-input').value, 10);
+      if (!Number.isInteger(n) || n < 1 || n > MAX_LEVEL) return;
+      testMode = !$('jump-save').checked;
+      loadLevel(n);
+    });
+  })();
+
+  /* ---------- Ciclo de Vida Android (Timers, Áudio, Resize) ---------- */
+  function startTick() {
+    if (tickTimer) return;
+    tickTimer = setInterval(updateButtons, 1000);
+  }
+  function stopTick() {
+    if (!tickTimer) return;
+    clearInterval(tickTimer);
+    tickTimer = null;
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      stopTick();
+      if (ac && ac.state === 'running') {
+        try { ac.suspend().catch(() => {}); } catch (e) {}
+      }
+    } else {
+      updateButtons();
+      startTick();
+      if (ac && ac.state === 'suspended' && !muted) {
+        try { ac.resume().catch(() => {}); } catch (e) {}
+      }
+    }
+  });
+
+  if (typeof ResizeObserver === 'function') {
+    const ro = new ResizeObserver(() => layoutBoard());
+    ro.observe(document.body);
+  }
+  window.addEventListener('resize', layoutBoard);
+
+  /* ---------- Instalação PWA Android & Service Worker ---------- */
+  (function setupPWA() {
+    if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+
+    const installBtn = $('install-app');
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    if (isStandalone) return;
+
+    const supportsWebInstall = typeof Navigator !== 'undefined' && typeof Navigator.prototype.install === 'function';
+    let deferredInstallPrompt = null;
+
+    if (supportsWebInstall) installBtn.hidden = false;
+
+    window.addEventListener('beforeinstallprompt', event => {
+      event.preventDefault();
+      deferredInstallPrompt = event;
+      if (!supportsWebInstall) {
+        installBtn.hidden = false;
+        layoutBoard();
+      }
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      installBtn.hidden = true;
+      layoutBoard();
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (installBtn.getAttribute('aria-disabled') === 'true') return;
+      installBtn.setAttribute('aria-disabled', 'true');
+      try {
+        if (supportsWebInstall) {
+          await navigator.install();
+          installBtn.hidden = true;
+        } else if (deferredInstallPrompt) {
+          const promptEvent = deferredInstallPrompt;
+          deferredInstallPrompt = null;
+          await promptEvent.prompt();
+          const { outcome } = await promptEvent.userChoice;
+          if (outcome === 'accepted' || !deferredInstallPrompt) {
+            installBtn.hidden = true;
+          }
+        }
+      } catch (err) {
+        // Ignora cancelamento pelo usuário
+      } finally {
+        installBtn.removeAttribute('aria-disabled');
+        layoutBoard();
+      }
+    });
+  })();
+
+  /* ---------- Inicialização ---------- */
+  loadPrefs();
+  applyPrefsUI();
+  lastExtraAt = clampTimestamp(parseInt(storageGet(KEY_EXTRA), 10));
+  lastUndoAt = clampTimestamp(parseInt(storageGet(KEY_UNDO), 10));
+
+  let startLevel = parseInt(storageGet(KEY_LVL), 10) || 1;
+  try {
+    const q = parseInt(new URLSearchParams(location.search).get('nivel'), 10);
+    if (q > 0) {
+      startLevel = Math.min(MAX_LEVEL, q);
+      testMode = true;
+    }
+  } catch (e) {}
+
+  startTick();
+  loadLevel(startLevel);
+})();
+</script>
+</body>
+</html>
